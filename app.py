@@ -3,147 +3,167 @@ import pandas as pd
 import datetime
 import math
 
-# Configuration de la page adaptée aux mobiles
+# إعدادات شاشة التطبيق المتوافقة مع الهواتف الذكية
 st.set_page_config(page_title="DZ Muscu App v2.0", page_icon="🏋️‍♂️", layout="centered")
 
-# Style CSS pour le thème sombre Premium et moderne
+# تعديل الواجهة البرمجية لتصبح باللون الداكن العصري (Premium Dark Mode) عبر CSS
 st.markdown("""
-    <style>
-    .main { background-color: #0d1117; color: #c9d1d9; }
-    .stApp { background-color: #0d1117; }
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #161b22; padding: 10px; border-radius: 12px; }
-    .stTabs [data-baseweb="tab"] { color: #8b949e; background-color: transparent; padding: 10px 16px; border-radius: 8px; font-weight: bold; }
-    .stTabs [aria-selected="true"] { color: #58a6ff !important; background-color: #21262d !important; border-bottom: 2px solid #58a6ff; }
-    div[data-testid="stBlock"] { background-color: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-    h1, h2, h3 { color: #58a6ff !important; font-family: 'Segoe UI', sans-serif; }
-    .stButton>button { background-color: #238636 !important; color: white !important; border-radius: 8px !important; width: 100% !important; border: none !important; padding: 10px !important; font-weight: bold !important; }
-    .stButton>button:hover { background-color: #2ea043 !important; }
-    .nutrition-card { background-color: #21262d; border-left: 4px solid #58a6ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-    </style>
+<style>
+    .stApp {
+        background-color: #121212;
+        color: #FFFFFF;
+    }
+    div.stTabs [data-baseweb="tab-list"] {
+        background-color: #1E1E1E;
+        border-radius: 10px;
+        padding: 5px;
+    }
+    div.stTabs [data-baseweb="tab"] {
+        color: #BBBBBB;
+        font-weight: bold;
+    }
+    div.stTabs [data-baseweb="tab"][aria-selected="true"] {
+        color: #4CAF50;
+    }
+    .card {
+        background-color: #1E1E1E;
+        padding: 18px;
+        border-radius: 12px;
+        border: 1px solid #2D2D2D;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    h3 {
+        color: #4CAF50 !important;
+    }
+</style>
 """, unsafe_allow_html=True)
 
-st.title("🏋️‍♂️ DZ Muscu App v2.0")
-st.write("Programme de 3 jours Full-Body & Nutrition Économique (20,000 DA/mois)")
+st.title("🏋️‍♂️ تطبيق DZ Muscu App v2.0")
+st.write("برنامج 3 أيام بميزانية اقتصادية 20,000 دج مع تتبع كامل للأوزان والوجبات والنسب الحيوية")
 
-# Initialisation de la base de données locale temporaire
+# تهيئة مخزن البيانات في الجلسة لتتبع أداء الحصص
 if "workout_logs" not in st.session_state:
-    st.session_state.workout_logs = pd.DataFrame(columns=["Date", "Séance", "Exercice", "Poids (kg)", "Répétitions"])
+    st.session_state.workout_logs = pd.DataFrame(columns=["التاريخ", "الحصة", "التمرين", "الوزن (كغ)", "العدّات"])
 
-tab1, tab2, tab3, tab4 = st.tabs(["💪 Entraînement", "🥗 Nutrition", "📏 Suivi & Masse Grasse", "📈 Historique"])
+# إنشاء التبويبات الأربعة للتطبيق
+tab1, tab2, tab3, tab4 = st.tabs(["💪 التمارين والتتبع", "🥗 التغذية الكاملة", "📏 نسب الجسم والدهون", "📈 سجل التطور"])
 
-# === ONGLET 1 : ENTRAÎNEMENT & LOGBOOK ===
+# ==================== التبويب الأول: التمارين والتتبع ====================
 with tab1:
-    st.header("🏋️‍♂️ Suivi de votre Séance")
-    seance = st.selectbox("Choisir la séance du jour :", ["Jour 1: Focus Poussée / Pectoraux", "Jour 2: Focus Tirage / Dos", "Jour 3: Séance Complète")])
+    st.header("🏋️‍♂️ سجل أدائك التدريبي اليوم")
+    seance = st.selectbox("اختر الحصة الحالية:", ["اليوم الأول (دفع وصدر)", "اليوم الثاني (سحب وظهر)", "اليوم الثالث (شامل مكثف)"])
     
-    # Liste complète des 15 exercices structurés avec des images fiables
-    exercices = {
-        "Jour 1: Focus Poussée / Pectoraux": [
-            {"name": "Squat à la barre (Barbell Squat)", "desc": "3 séries x 8-10 reps (Cuisses)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/barbell-squat-exercise-guide.png"},
-            {"name": "Développé couché (Bench Press)", "desc": "4 séries x 8-12 reps (Pectoraux)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/barbell-bench-press-exercise-guide.png"},
-            {"name": "Développé épaules aux haltères", "desc": "3 séries x 10 reps (Épaules antérieures)", "img": "https://workoutlabs.com/wp-content/uploads/2014/10/seated-dumbbell-shoulder-press-exercise-guide.png"},
-            {"name": "Tirage vertical poulie haute", "desc": "3 séries x 10-12 reps (Grand dorsal)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/lat-pulldown-exercise-guide.png"},
-            {"name": "Extensions Triceps à la poulie", "desc": "3 séries x 12 reps (Bras arrière)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/triceps-pushdown-exercise-guide.png"}
+    # قائمة الـ 15 تمريناً كاملة ومنسجمة بدون أي نقص
+    exercises = {
+        "اليوم الأول (دفع وصدر)": [
+            {"name": "السكوات بالبار (Barbell Squat)", "desc": "3 مجموعات × 8-10 تكرارات (أرجل)"},
+            {"name": "ضغط صدر مستوي بالبار (Bench Press)", "desc": "4 مجموعات × 8-12 تكرار (صدر)"},
+            {"name": "ضغط أكتاف بالدمبلز جالس (Shoulder Press)", "desc": "3 مجموعات × 10 تكرارات (كتف أمامي)"},
+            {"name": "سحب ظهر عمودي (Lat Pulldown)", "desc": "3 مجموعات × 10-12 تكرار (ظهر عريض)"},
+            {"name": "تمرين ترايسبس خلفي بالكابل (Pushdown)", "desc": "3 مجموعات × 12 تكرار (ذراع خلفي)"}
         ],
-        "Jour 2: Focus Tirage / Dos": [
-            {"name": "Soulevé de terre (Deadlift)", "desc": "3 séries x 8 reps (Ischios & Lombaires)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/barbell-deadlift-exercise-guide.png"},
-            {"name": "Rowing barre (Barbell Row)", "desc": "4 séries x 8-10 reps (Épaisseur du dos)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/barbell-row-exercise-guide.png"},
-            {"name": "Écartés inclinés haltères", "desc": "3 séries x 10-12 reps (Haut des pectoraux)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/incline-dumbbell-fly-exercise-guide.png"},
-            {"name": "Élévations latérales aux haltères", "desc": "4 séries x 12-15 reps (Largeur d'épaules)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/dumbbell-lateral-raise-exercise-guide.png"},
-            {"name": "Curl Biceps alterné avec haltères", "desc": "3 séries x 12 reps (Bras avant)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/alternating-dumbbell-biceps-curl-exercise-guide.png"}
+        "اليوم الثاني (سحب وظهر)": [
+            {"name": "الرفعة الميتة (Deadlift)", "desc": "3 مجموعات × 8 تكرارات (أرجل خلفية وأسفل الظهر)"},
+            {"name": "تجديف بالبار للظهر (Barbell Row)", "desc": "4 مجموعات × 8-10 تكرارات (سمك الظهر)"},
+            {"name": "تجميع صدر مائل بالدمبلز (Incline Fly)", "desc": "3 مجموعات × 10-12 تكرار (صدر علوي)"},
+            {"name": "رفرفة أكتاف جانبي بالدمبلز (Lateral Raise)", "desc": "4 مجموعات × 12-15 تكرار (عرض الأكتاف)"},
+            {"name": "تبادل بايسبس بالدمبلز (Biceps Curl)", "desc": "3 مجموعات × 12 تكرار (ذراع أمامي)"}
         ],
-        "Jour 3: Séance Complète": [
-            {"name": "Presse à cuisses (Leg Press)", "desc": "4 séries x 10-12 reps (Cuisses)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/sled-leg-press-exercise-guide.png"},
-            {"name": "Répulsions aux barres parallèles (Dips)", "desc": "3 séries x 10 reps (Bas des pectoraux & Triceps)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/chest-dips-exercise-guide.png"},
-            {"name": "Rowing assis à la poulie basse", "desc": "3 séries x 10 reps (Milieu du dos)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/seated-cable-row-exercise-guide.png"},
-            {"name": "Développé militaire à la barre", "desc": "3 séries x 8 reps (Épaules & Gainage)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/barbell-military-press-exercise-guide.png"},
-            {"name": "Crunches abdominaux & Gainage", "desc": "3 séries x max reps (Abdos)", "img": "https://workoutlabs.com/wp-content/uploads/2013/05/crunches-exercise-guide.png"}
+        "اليوم الثالث (شامل مكثف)": [
+            {"name": "ضغط أرجل على الجهاز (Leg Press)", "desc": "4 مجموعات × 10-12 تكرار (أرجل)"},
+            {"name": "غطس المتوازي (Dips)", "desc": "3 مجموعات × 10 تكرارات (أسفل الصدر والترايسبس)"},
+            {"name": "سحب أرضي للظهر (Seated Cable Row)", "desc": "3 مجموعات × 10 تكرارات (منتصف الظهر)"},
+            {"name": "ضغط أكتاف بالبار واقف (Military Press)", "desc": "3 مجموعات × 8 تكرارات (أكتاف وقوة عامة)"},
+            {"name": "تمرين بطن (Crunches) + بلانك", "desc": "3 مجموعات حتى التعب"}
         ]
     }
     
-    st.info("💡 Règle de Surcharge Progressive : si vous validez toutes vos reps, ajoutez +2.5 kg à la prochaine séance !")
+    current_inputs = []
+    st.info("💡 لتطبيق الزيادة التدريجية: عند إكمال التكرارات المستهدفة بسهولة، أضف 2.5 كغ في الحصة القادمة.")
     
-    logs_du_jour = []
-    for ex in exercices[seance]:
-        st.subheader(ex["name"])
-        col1, col2 = st.columns([1, 1])
+    for ex in exercises[seance]:
+        st.markdown(f"<div class='card'><h4>{ex['name']}</h4><p style='color: #AAA; margin:0;'>{ex['desc']}</p></div>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
         with col1:
-            st.image(ex["img"], caption=ex["desc"], use_container_width=True)
+            w = st.number_input(f"الوزن (كغ) - {ex['name']}", min_value=0.0, max_value=300.0, step=2.5, key=f"w_{ex['name']}")
         with col2:
-            poids = st.number_input(f"Poids (kg) - {ex['name']}", min_value=0.0, step=2.5, key=f"w_{ex['name']}")
-            reps = st.number_input(f"Répétitions - {ex['name']}", min_value=0, max_value=100, step=1, key=f"r_{ex['name']}")
-            logs_du_jour.append({"Exercice": ex["name"], "Poids (kg)": poids, "Répétitions": reps})
-        st.markdown("<hr style='border-color: #30363d;' />", unsafe_allow_html=True)
+            r = st.number_input(f"عدد العدّات - {ex['name']}", min_value=0, max_value=50, step=1, key=f"r_{ex['name']}")
+        current_inputs.append({"التمرين": ex["name"], "الوزن (كغ)": w, "العدّات": r})
+        st.markdown("---")
         
-    if st.button("💾 Enregistrer la séance du jour"):
-        nouveaux_logs = []
-        date_today = datetime.date.today().strftime("%Y-%m-%d")
-        for l in logs_du_jour:
-            if l["Répétitions"] > 0:
-                nouveaux_logs.append({"Date": date_today, "Séance": seance, "Exercice": l["Exercice"], "Poids (kg)": l["Poids (kg)"], "Répétitions": l["Répétitions"]})
-        if nouveaux_logs:
-            st.session_state.workout_logs = pd.concat([st.session_state.workout_logs, pd.DataFrame(nouveaux_logs)], ignore_index=True)
-            st.success("✅ Données enregistrées ! Retrouvez-les dans l'onglet Historique.")
+    if st.button("💾 حفظ حصة اليوم وتخزين البيانات", type="primary"):
+        records = []
+        today = datetime.date.today().strftime("%Y-%m-%d")
+        for log in current_inputs:
+            if log["العدّات"] > 0:
+                records.append({
+                    "التاريخ": today,
+                    "الحصة": seance,
+                    "التمرين": log["التمرين"],
+                    "الوزن (كغ)": log["الوزن (كغ)"],
+                    "العدّات": log["العدّات"]
+                })
+        if records:
+            st.session_state.workout_logs = pd.concat([st.session_state.workout_logs, pd.DataFrame(records)], ignore_index=True)
+            st.success("✅ تم حفظ الحصة بنجاح في سجل التطور الخاص بك!")
         else:
-            st.warning("⚠️ Veuillez entrer des répétitions pour sauvegarder l'exercice.")
+            st.warning("⚠️ يرجى إدخال عدد العدّات لتسجيل التمرين بنجاح.")
 
-# === ONGLET 2 : NUTRITION COMPLÈTE ===
+# ==================== التبويب الثاني: التغذية الكاملة ====================
 with tab2:
-    st.header("🥗 Programme Nutritionnel Économique Complet")
-    st.write("Répartition stratégique pour maximiser la synthèse protéique et stimuler les hormones naturellement.")
+    st.header("🥗 البرنامج الغذائي الاقتصادي الشامل (20,000 دج/شهر)")
     
     st.markdown("""
-    <div class='nutrition-card'>
-        <h4>🥚 Repas 1 : Petit-Déjeuner (Production de Testostérone)</h4>
-        <p>• <b>3 œufs entiers</b> (riches en bon cholestérol pour synthétiser le tissu musculaire).</p>
-        <p>• <b>60g de flocons d'avoine</b> cuits dans l'eau avec une demi-banane (glucides complexes).</p>
+    <div class='card'>
+        <h3>🍳 الوجبة 1: الفطور</h3>
+        <p>• 3 بيضات كاملة مسلوقة أو مقلية بمسحة زيت زيتون.</p>
+        <p>• 60-80 غرام شوفان مطبوخ بالماء مع نصف موزة.</p>
+        <p style='color: #4CAF50;'>💡 الهدف الهرموني: الكوليسترول الصحي في صفار البيض يحفز تصنيع هرمون التستوستيرون صباحاً.</p>
     </div>
-    <div class='nutrition-card'>
-        <h4>🥩 Repas 2 : Déjeuner (Énergie & Anti-Cortisol)</h4>
-        <p>• <b>150g de foie de poulet</b> (Kibda) sautés avec de l'ail et de l'oignon (abaisse le cortisol, riche en fer et zinc).</p>
-        <p>• <b>150g de riz blanc</b> ou pâtes bouillies.</p>
-        <p>• Une assiette de salade verte légère.</p>
+    <div class='card'>
+        <h3>🍗 الوجبة 2: الغداء</h3>
+        <p>• 150-200 غرام كبدة دجاج مطبوخة بالثوم والبصل العطري.</p>
+        <p>• 150 غرام أرز مسلوق أو معكرونة + طبق سلطة خضراء خفيف.</p>
+        <p style='color: #4CAF50;'>💡 الهدف الهرموني: كبدة الدجاج توفر الزنك والحديد، بينما يعمل الثوم والبصل على خفض الكورتيزول.</p>
     </div>
-    <div class='nutrition-card'>
-        <h4>🌌 Repas 3 : Unique Repas Post-Entraînement / Pré-Sommeil</h4>
-        <p>• <b>1 boîte de thon à l'eau</b> égouttée ou 3 blancs d'œufs bouillis (acides aminés rapides).</p>
-        <p>• <b>2 pots de fromage blanc nature</b> (caséine pour nourrir les muscles pendant 8h de sommeil).</p>
-        <p>• <b>150g à 200g de pomme de terre bouillie</b> (glucides sains facilitant l'endormissement sans pic d'insuline trop violent).</p>
-        <p>• <b>Une poignée de cacahuètes grillées sans sel</b> (magnésium et lipides pour maximiser l'hormone de croissance GH).</p>
+    <div class='card'>
+        <h3>🌌 الوجبة 3: الوجبة الليلية الضخمة المدمجة (بعد التمرين وقبل النوم مباشرة)</h3>
+        <p>• 1 علبة تونة بالماء (مصفاة جيدا) أو 3 بيضات مسلوقة (بياض فقط).</p>
+        <p>• 2 علب جبن طبيعي ناتير (Natur'a / جبن ريجيم لتدفق أحماض الكازين ببطء طوال 8 ساعات نوم).</p>
+        <p>• 150-200 غرام بطاطا مسلوقة أو مشوية لإعادة شحن مخازن الجليكوجين وضمان النوم العميق.</p>
+        <p>• حفنة صغيرة من الفول السوداني (كاوكاو محمص بدون ملح) لتوفير المغنيسيوم والدهون الصحية.</p>
+        <p style='color: #FF9800;'>⚠️ تنبيه هرموني: الوجبة خالية تماماً من السكريات البسيطة لضمان ذروة إفراز هرمون النمو (GH) ليلاً.</p>
     </div>
     """, unsafe_allow_html=True)
-    st.warning("🚫 Règle d'or : Aucun sucre rapide (biscuits, boissons sucrées) avant le coucher pour éviter de bloquer l'hormone de croissance pendant la nuit.")
 
-# === ONGLET 3 : SUIVI & MASSE GRASSE ===
+# ==================== التبويب الثالث: نسب الجسم والدهون ====================
 with tab3:
-    st.header("📏 Calculateur de Masse Grasse & Métrique")
-    st.write("Formule officielle de l'US Navy (sans pinces ni balances coûteuses).")
+    st.header("📏 حاسبة نسبة الدهون والكتلة الصافية (US Navy Formula)")
+    height = st.number_input("الطول (سم):", min_value=120.0, max_value=230.0, value=175.0)
+    weight = st.number_input("الوزن الإجمالي (كغ):", min_value=30.0, max_value=200.0, value=75.0)
+    neck = st.number_input("محيط الرقبة (سم):", min_value=20.0, max_value=60.0, value=38.0)
+    waist = st.number_input("محيط الخصر عند السرة (سم):", min_value=40.0, max_value=150.0, value=85.0)
     
-    taille = st.number_input("Votre taille (cm) :", min_value=120.0, max_value=230.0, value=175.0)
-    poids_actuel = st.number_input("Votre poids actuel (kg) :", min_value=30.0, max_value=200.0, value=75.0)
-    cou = st.number_input("Tour de cou au milieu (cm) :", min_value=20.0, max_value=60.0, value=38.0)
-    taille_ventre = st.number_input("Tour de taille au nombril (cm) :", min_value=40.0, max_value=150.0, value=85.0)
-    
-    if st.button("📊 Analyser la composition corporelle"):
-        bmi = poids_actuel / ((taille / 100) ** 2)
-        try:
-            bf = 86.010 * math.log10(taille_ventre - cou) - 70.041 * math.log10(taille) + 36.76
-            masse_grasse = poids_actuel * (bf / 100)
-            masse_seche = poids_actuel - masse_grasse
-            
-            st.metric("📉 Taux de Masse Grasse estimé :", f"{bf:.1f} %")
-            st.metric("💪 Masse Musculaire Sèche (LBM) :", f"{masse_seche:.1f} kg")
-            st.metric("⚖️ Indice de Masse Corporelle (BMI) :", f"{bmi:.1f}")
-        except:
-            st.error("Veuillez vérifier les mesures (le tour de taille doit être supérieur au tour de cou).")
+    if st.button("📊 احسب مكونات الجسم الحالية"):
+        bmi = weight / ((height / 100) ** 2)
+        if waist > neck:
+            bf = 86.010 * math.log10(waist - neck) - 70.041 * math.log10(height) + 36.76
+            fat_m = weight * (bf / 100)
+            lean_m = weight - fat_m
+            st.success(f"📉 نسبة الدهون المقدرة للجسم: {bf:.1f} %")
+            st.success(f"💪 الكتلة العضلية الصافية المحسوبة: {lean_m:.1f} كغ")
+            st.success(f"⚖️ مؤشر كتلة الجسم العام (BMI): {bmi:.1f}")
+        else:
+            st.error("❌ خطأ قياسي: يجب أن يكون محيط الخصر أكبر من محيط الرقبة لحساب المعادلة.")
 
-# === ONGLET 4 : HISTORIQUE ===
+# ==================== التبويب الرابع: سجل التطور ====================
 with tab4:
-    st.header("📈 Suivi Historique des Performances")
+    st.header("📈 جدول مراقبة الأداء والتطور التاريخي")
     if not st.session_state.workout_logs.empty:
         st.dataframe(st.session_state.workout_logs, use_container_width=True)
-        if st.button("🗑️ Réinitialiser tout l'historique"):
-            st.session_state.workout_logs = pd.DataFrame(columns=["Date", "Séance", "Exercice", "Poids (kg)", "Répétitions"])
+        if st.button("🗑️ مسح السجل وإعادة التصفير"):
+            st.session_state.workout_logs = pd.DataFrame(columns=["التاريخ", "الحصة", "التمرين", "الوزن (كغ)", "العدّات"])
             st.rerun()
     else:
-        st.info("📭 Aucun entraînement enregistré pour le moment. Allez au premier onglet pour enregistrer votre séance !")
+        st.info("المذكرة فارغة حالياً. بمجرد تسجيل وتخزين أول تمرين من التبويب الأول، ستظهر النتائج والتوثيقات هنا.")
